@@ -31,6 +31,27 @@
 
   <title>hw4</title>
   <link rel="manifest" href="manifest.json">
+
+ <!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+
+  <script>
+    // Your Firebase config (get this from your Firebase Console)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCImdQCXcVuxKg8YOGhVZaXrm8QZ427sHQ",
+      authDomain: "hw04-40f58.firebaseapp.com",
+      projectId: "hw04-40f58",
+      storageBucket: "hw04-40f58.firebasestorage.app",
+      messagingSenderId: "3403600468",
+      appId: "1:3403600468:web:df2bbea66b7f0fa80853c1"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
