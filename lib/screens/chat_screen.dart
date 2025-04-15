@@ -16,7 +16,7 @@ class ChatScreen extends StatelessWidget {
           .doc(boardName)
           .collection('messages')
           .add({
-        'text': messageController.text,
+        'text': messageController.text.trim(),
         'uid': user.uid,
         'timestamp': Timestamp.now(),
       });
@@ -40,15 +40,44 @@ class ChatScreen extends StatelessWidget {
             child: StreamBuilder<QuerySnapshot>(
               stream: messagesRef.snapshots(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData) return CircularProgressIndicator();
+                if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
                 final docs = snapshot.data!.docs;
                 return ListView.builder(
                   itemCount: docs.length,
                   itemBuilder: (context, index) {
                     final data = docs[index];
-                    return ListTile(
-                      title: Text(data['text']),
-                      subtitle: Text(data['timestamp'].toDate().toString()),
+                    final uid = data['uid'];
+                    final messageText = data['text'];
+                    final timestamp = data['timestamp'].toDate();
+
+                    // Fetch user's full name based on UID
+                    return FutureBuilder<DocumentSnapshot>(
+                      future: FirebaseFirestore.instance.collection('users').doc(uid).get(),
+                      builder: (context, userSnapshot) {
+                        if (!userSnapshot.hasData) return SizedBox.shrink();
+
+                        final userData = userSnapshot.data!.data() as Map<String, dynamic>?;
+
+                        if (userData == null || !userData.containsKey('first_name') || !userData.containsKey('last_name')) {
+                          return ListTile(
+                            title: Text(messageText),
+                            subtitle: Text('Unknown user • $timestamp'),
+                          );
+                        }
+
+                        final fullName = '${userData['first_name']} ${userData['last_name']}';
+
+                        return ListTile(
+                          title: Text(messageText),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("Sent by: $fullName"),
+                              Text(timestamp.toString()),
+                            ],
+                          ),
+                        );
+                      },
                     );
                   },
                 );
@@ -58,9 +87,15 @@ class ChatScreen extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: TextField(controller: messageController),
+                child: TextField(
+                  controller: messageController,
+                  decoration: InputDecoration(hintText: 'Enter message...'),
+                ),
               ),
-              IconButton(icon: Icon(Icons.send), onPressed: sendMessage),
+              IconButton(
+                icon: Icon(Icons.send),
+                onPressed: sendMessage,
+              ),
             ],
           ),
         ],

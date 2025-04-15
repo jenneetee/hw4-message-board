@@ -11,16 +11,21 @@ class RegisterScreen extends StatelessWidget {
   void register(BuildContext context) async {
     try {
       final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
       );
 
-      await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
-        'first_name': fnameController.text,
-        'last_name': lnameController.text,
-        'role': 'user',
-        'created_at': Timestamp.now(),
-      });
+      final user = userCredential.user;
+
+      if (user != null) {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'first_name': fnameController.text.trim(),
+          'last_name': lnameController.text.trim(),
+          'email': user.email,
+          'role': 'user',
+          'created_at': Timestamp.now(),
+        });
+      }
 
       Navigator.pop(context);
     } catch (e) {
@@ -39,6 +44,7 @@ class RegisterScreen extends StatelessWidget {
           TextField(controller: lnameController, decoration: InputDecoration(labelText: 'Last Name')),
           TextField(controller: emailController, decoration: InputDecoration(labelText: 'Email')),
           TextField(controller: passwordController, decoration: InputDecoration(labelText: 'Password'), obscureText: true),
+          SizedBox(height: 16),
           ElevatedButton(onPressed: () => register(context), child: Text("Register")),
         ]),
       ),
