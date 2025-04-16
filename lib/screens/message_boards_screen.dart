@@ -5,7 +5,7 @@ import 'settings_screen.dart';
 
 class MessageBoardsScreen extends StatelessWidget {
   final List<Map<String, String>> boards = [
-    {'name': 'Tech Talk', 'icon': '💻'},
+    {'name': 'Make-Up Tips', 'icon': '💄'},
     {'name': 'Gaming', 'icon': '🎮'},
     {'name': 'Random', 'icon': '🎲'},
   ];

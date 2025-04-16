@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -9,67 +10,57 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final _auth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
+  TextEditingController _bioController = TextEditingController();
 
-  // Update the user's email
-  Future<void> _updateEmail() async {
-    try {
-      User? user = _auth.currentUser;
-      if (user != null) {
-        await user.updateEmail(_emailController.text.trim());
-        await user.reload();
-        user = _auth.currentUser; // Refresh the user data
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Email updated successfully")),
-        );
-      }
-    } catch (e) {
-      print("Error updating email: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error updating email")),
-      );
-    }
-  }
-
-  // Update the user's password
-  Future<void> _updatePassword() async {
-    try {
-      User? user = _auth.currentUser;
-      if (user != null) {
-        await user.updatePassword(_passwordController.text.trim());
-        await user.reload();
-        user = _auth.currentUser; // Refresh the user data
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Password updated successfully")),
-        );
-      }
-    } catch (e) {
-      print("Error updating password: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error updating password")),
-      );
-    }
-  }
+  User? user;
+  DocumentSnapshot? userDoc;
 
   @override
   void initState() {
     super.initState();
-    // Pre-fill the email field with the current user's email
-    _emailController.text = _auth.currentUser?.email ?? '';
+    user = _auth.currentUser;
+    _loadUserData();
+  }
+
+  // Load the user's data from Firestore
+  Future<void> _loadUserData() async {
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(user!.uid).get();
+      setState(() {
+        userDoc = doc;
+        _bioController.text = doc['bio'] ?? '';  // Load the bio from Firestore
+      });
+    }
+  }
+
+  // Update the user's bio in Firestore
+  Future<void> _updateBio() async {
+    if (user != null) {
+      try {
+        await FirebaseFirestore.instance.collection('users').doc(user!.uid).update({
+          'bio': _bioController.text.trim(),
+        });
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Bio updated successfully")));
+      } catch (e) {
+        print("Error updating bio: $e");
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error updating bio")));
+      }
+    }
   }
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
+    _bioController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Edit Profile")),
+      appBar: AppBar(
+        title: Text("Edit Profile"),
+        backgroundColor: Color(0xFFF28482),  // Using the app's custom color
+      ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Form(
@@ -77,27 +68,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              // Email field
+              // Bio field
               TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
+                controller: _bioController,
+                decoration: InputDecoration(labelText: 'Bio'),
+                maxLines: 3,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20),
-
-              // Password field
-              TextFormField(
-                controller: _passwordController,
-                decoration: InputDecoration(labelText: 'New Password'),
-                obscureText: true,
-                validator: (value) {
-                  if (value != null && value.length < 6) {
-                    return 'Password must be at least 6 characters long';
+                    return 'Please enter your bio';
                   }
                   return null;
                 },
@@ -108,13 +86,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    // Only attempt update if validation passes
-                    if (_emailController.text.isNotEmpty) {
-                      await _updateEmail();
-                    }
-                    if (_passwordController.text.isNotEmpty) {
-                      await _updatePassword();
-                    }
+                    // Update the bio if valid
+                    await _updateBio();
                   }
                 },
                 child: Text('Save Changes'),

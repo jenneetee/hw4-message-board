@@ -84,19 +84,34 @@ class ChatScreen extends StatelessWidget {
               },
             ),
           ),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: messageController,
-                  decoration: InputDecoration(hintText: 'Enter message...'),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+            color: Colors.grey.shade200,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: Colors.grey.shade400),
+                    ),
+                    child: TextField(
+                      controller: messageController,
+                      decoration: InputDecoration(
+                        hintText: 'Enter message...',
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              IconButton(
-                icon: Icon(Icons.send),
-                onPressed: sendMessage,
-              ),
-            ],
+                IconButton(
+                  icon: Icon(Icons.send, color: Theme.of(context).primaryColor),
+                  onPressed: sendMessage,
+                ),
+              ],
+            ),
           ),
         ],
       ),
