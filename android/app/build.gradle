@@ -1,0 +1,38 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'dev.flutter.flutter-gradle-plugin'
+apply plugin: 'com.google.gms.google-services'
+
+android {
+    namespace 'com.example.hw4'
+    compileSdkVersion 34  // Replace with the correct version if needed
+
+    ndkVersion flutter.ndkVersion  // Make sure flutter.ndkVersion is properly set in gradle.properties or flutter configuration.
+
+    defaultConfig {
+        applicationId "com.example.hw4"  // Your app ID
+        minSdkVersion 21  // Set based on your Flutter project's minSdkVersion
+        targetSdkVersion 34  // Set based on your Flutter project's targetSdkVersion
+        versionCode 1  // Increment with app versioning
+        versionName "1.0"  // Use your app's version name
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.debug
+        }
+    }
+}
+
+flutter {
+    source '../..'  // Correct source location for your Flutter project
+}

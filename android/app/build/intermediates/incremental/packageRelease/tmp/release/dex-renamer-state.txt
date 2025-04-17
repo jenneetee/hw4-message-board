@@ -1,0 +1,4 @@
+#Thu Apr 17 11:28:10 EDT 2025
+base.0=D\:\\VS Code\\hw4\\android\\app\\build\\intermediates\\dex\\release\\minifyReleaseWithR8\\classes.dex
+path.0=classes.dex
+renamed.0=classes.dex
